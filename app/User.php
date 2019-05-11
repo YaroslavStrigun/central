@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Models\Brigade;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -16,7 +17,16 @@ class User extends \TCG\Voyager\Models\User
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'name',
+        'email',
+        'password',
+        'brigade_id',
+        'document',
+        'qualification',
+        'education',
+        'experience',
+        'work_place',
+        'certificate'
     ];
 
     /**
@@ -36,4 +46,14 @@ class User extends \TCG\Voyager\Models\User
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function brigade()
+    {
+        return $this->belongsTo(Brigade::class);
+    }
+
+    public function getLocaleAttribute()
+    {
+        return 'ru';
+    }
 }
