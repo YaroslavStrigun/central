@@ -23,4 +23,9 @@ class Brigade extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    public function brigade_calls()
+    {
+        return $this->hasMany(BrigadeCall::class);
+    }
 }
