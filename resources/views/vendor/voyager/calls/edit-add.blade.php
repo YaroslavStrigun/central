@@ -93,6 +93,129 @@
                                 </div>
                             @endforeach
 
+                            <div class="patient">
+                                <h3>Пацієнт</h3>
+                                @php
+                                    $patient = $dataTypeContent->patient ?? new \App\Patient();
+                                @endphp
+                                <div class="form-group  col-md-4 ">
+                                    <label class="control-label" for="patient[name]">ПІБ пацієнта</label>
+                                    <input type="text" value="{{ $patient->name }}" name="patient[name]" class="form-control">
+                                </div>
+                                <div class="form-group  col-md-3 ">
+                                    <label class="control-label" for="patient[phone]">Тел</label>
+                                    <input type="text" value="{{ $patient->phone }}" name="patient[phone]" class="form-control">
+                                </div>
+                                <div class="form-group  col-md-1 ">
+                                    <label class="control-label" for="patient[age]">Вік</label>
+                                    <input type="number" name="patient[age]" value="{{ $patient->age }}" min="0" max="130" class="form-control">
+                                </div>
+                                <div class="form-group  col-md-2 ">
+                                    <label class="control-label" for="patient[male]">Стать</label>
+                                    <input type="checkbox"
+                                           name="patient[male]"
+                                           class="toggleswitch"
+                                           data-on="Чоловіча"
+                                           {{ $patient->male ? ' checked' : '' }}
+                                           data-off="Жіноча">
+                                </div>
+                                <div class="form-group  col-md-2 ">
+                                    <label class="control-label" for="patient[reasonableness]">Обґрунтованість</label>
+                                    <input type="checkbox"
+                                           name="patient[reasonableness]"
+                                           class="toggleswitch"
+                                           data-on="Проф"
+                                           {{ $patient->reasonableness ? ' checked' : '' }}
+                                           data-off="Непроф">
+                                </div>
+                                <div class="form-group  col-md-4 ">
+                                    <label class="control-label" for="patient[address]">Адресса</label>
+                                    <input type="text" name="patient[address]" value="{{ $patient->address }}" class="form-control">
+                                </div>
+                                <div class="form-group  col-md-2 ">
+                                    <label class="control-label" for="patient[social_status_id]">Соц. статус</label>
+                                    <select name="patient[social_status_id]" class="select2">
+                                        <option> Вибрати </option>
+                                        @foreach(\App\Models\SocialStatus::all() as $status)
+                                            <option value="{{ $status->id }}" {{ $patient->social_status_id == $status->id ? 'checked' : '' }}>
+                                                {{ $status->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group  col-md-2">
+                                    <label class="control-label" for="patient[further_stay]">Подальше перебування</label>
+                                    <input type="text" name="patient[further_stay]" value="{{ $patient->further_stay }}" class="form-control">
+                                </div>
+                                <div class="form-group  col-md-2">
+                                    <label class="control-label" for="patient[departure_type]">Тип виїзду</label>
+                                    <input type="text" name="patient[departure_type]" value="{{ $patient->departure_type }}" class="form-control">
+                                </div>
+                                <div class="form-group  col-md-2">
+                                    <label class="control-label" for="patient[place_off_call]">Місце виклику</label>
+                                    <input type="text" name="patient[place_off_call]" value="{{ $patient->place_off_call }}" class="form-control">
+                                </div>
+                                <div class="form-group  col-md-2">
+                                    <label class="control-label" for="patient[call_type]">Виклик</label>
+                                    <input type="text" name="patient[call_type]" value="{{ $patient->call_type }}" class="form-control">
+                                </div>
+                                <div class="form-group  col-md-2 ">
+                                    <label class="control-label" for="patient[trauma_id]">Травма</label>
+                                    <select name="patient[trauma_id]" class="select2">
+                                        <option> Вибрати </option>
+                                        @foreach(\App\Models\Trauma::all() as $trauma)
+                                            <option value="{{ $trauma->id }}" {{ $patient->trauma_id == $trauma->id ? 'checked' : '' }}>
+                                                {{ $trauma->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group  col-md-2">
+                                    <label class="control-label" for="patient[pathological_date]">Початок патолог. стану</label>
+                                    <input type="datetime-local" name="patient[pathological_date]" value="{{ $patient->pathological_date }}" class="form-control">
+                                </div>
+                                <div class="form-group  col-md-2 ">
+                                    <label class="control-label" for="patient[result_id]">Результат</label>
+                                    <select name="patient[result_id]" class="select2">
+                                        <option> Вибрати </option>
+                                        @foreach(\App\Models\Result::all() as $result)
+                                            <option value="{{ $result->id }}" {{ $patient->result_id == $result->id ? 'checked' : '' }}>
+                                                {{ $result->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group  col-md-2 ">
+                                    <label class="control-label" for="patient[unsuccessful_departure]">Безрезультатний</label>
+                                    <input type="checkbox"
+                                           name="patient[unsuccessful_departure]"
+                                           class="toggleswitch"
+                                           data-on="Так"
+                                           {{ $patient->unsuccessful_departure ? ' checked' : '' }}
+                                           data-off="Ні">
+                                </div>
+                                <div class="form-group  col-md-2 ">
+                                    <label class="control-label" for="patient[previous_diagnosis]">Попередній діагноз</label>
+                                    <select name="patient[previous_diagnosis]" class="select2">
+                                        <option> Вибрати </option>
+                                        @foreach([] as $diagnosis)
+                                            <option value="{{ $diagnosis->id }}" {{ $patient->previous_diagnosis == $diagnosis->id ? 'checked' : '' }}>
+                                                {{ $diagnosis->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group  col-md-2">
+                                    <label class="control-label" for="patient[anamnesis]">Анамнез</label>
+                                    <input type="text" name="patient[anamnesis]" value="{{ $patient->anamnesis }}" class="form-control">
+                                </div>
+                                <div class="form-group col-md-12">
+                                    <h4>Об'єктивні дані</h4>
+                                </div>
+                                <div class="form-group col-md-12">
+                                    <h4>Надана медична допомога</h4>
+                                </div>
+                                <div class="form-group col-md-12">
+                                    <h4>Стан після надання допомоги</h4>
+                                </div>
+                            </div>
+
                         </div><!-- panel-body -->
 
                         <div class="panel-footer">

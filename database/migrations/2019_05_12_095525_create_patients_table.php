@@ -30,7 +30,7 @@ class CreatePatientsTable extends Migration
             $table->dateTime('pathological_date')->nullable();
             $table->unsignedBigInteger('result_id')->nullable();
             $table->boolean('unsuccessful_departure')->default(0);
-            $table->text('previous diagnosis')->nullable();
+            $table->text('previous_diagnosis')->nullable();
             $table->string('anamnesis')->nullable();
             $table->json('objective_data')->nullable();
             $table->json('medicaid')->nullable();
