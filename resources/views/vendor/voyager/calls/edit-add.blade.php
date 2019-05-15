@@ -98,10 +98,36 @@
                             <div class="patient col-md-12">
                                 <h3>Бригада</h3>
                                 @if($dataTypeContent->brigade_call->first())
-                                @else
+                                    @php
+                                        $brigade_call = $dataTypeContent->brigade_call->first();
+                                    @endphp
                                     <div class="form-group col-md-2">
-                                        <select name="brigade_call[brigade_id]">
-                                            <option>Виберіть бригаду</option>
+                                        <label>Номер бригади</label>
+                                        <input type="number" name="brigade_id" value="{{ $brigade_call->brigade_id }}" disabled class="form-control">
+                                        <input type="hidden" name="brigade_id" value="{{ $brigade_call->brigade_id }}" class="form-control">
+                                    </div>
+                                    <div class="form-group col-md-2">
+                                        <label>Статус бригади</label>
+                                        <select name="brigade_call[brigade_status_id]" class="select2 form-control">
+                                            <option value="{{ null }}">Виберіть статус</option>
+                                            @foreach(\App\Models\BrigadeStatus::all() as $status)
+                                                <option value="{{ $status->id }}" {{ $status->id == $brigade_call->brigade_status_id ? 'selected' : '' }}>
+                                                    {{ $status->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-2">
+                                        <label>Час прибуття до пацієнта</label>
+                                       <input type="datetime-local" name="brigade_call[arrival_time]" value="{{ $brigade_call->arrival_time }}" class="form-control">
+                                    </div>
+                                    <div class="form-group col-md-2">
+                                        <label>Час виїзду до пацієнта</label>
+                                        <input type="datetime-local" name="brigade_call[departure_time]" value="{{ $brigade_call->departure_time }}" class="form-control">
+                                    </div>
+                                    @else
+                                    <div class="form-group col-md-2">
+                                        <select name="brigade_id" class="select2 form-control">
+                                            <option value="{{ null }}">Виберіть бригаду</option>
                                         @foreach(Auth::user()->station->brigades as $brigade)
                                             <option value="{{ $brigade->id }}">{{ $brigade->car->state_number ?? $brigade->id }}</option>
                                         @endforeach
@@ -155,7 +181,7 @@
                                 <div class="form-group  col-md-2 ">
                                     <label class="control-label" for="patient[social_status_id]">Соц. статус</label>
                                     <select name="patient[social_status_id]" class="select2">
-                                        <option> Вибрати</option>
+                                        <option value="{{ null }}"> Вибрати</option>
                                         @foreach(\App\Models\SocialStatus::all() as $status)
                                             <option
                                                 value="{{ $status->id }}" {{ $patient->social_status_id == $status->id ? 'checked' : '' }}>
@@ -187,7 +213,7 @@
                                 <div class="form-group  col-md-2 ">
                                     <label class="control-label" for="patient[trauma_id]">Травма</label>
                                     <select name="patient[trauma_id]" class="select2">
-                                        <option> Вибрати</option>
+                                        <option value="{{ null }}"> Вибрати</option>
                                         @foreach(\App\Models\Trauma::all() as $trauma)
                                             <option
                                                 value="{{ $trauma->id }}" {{ $patient->trauma_id == $trauma->id ? 'checked' : '' }}>
@@ -204,7 +230,7 @@
                                 <div class="form-group  col-md-2 ">
                                     <label class="control-label" for="patient[result_id]">Результат</label>
                                     <select name="patient[result_id]" class="select2">
-                                        <option> Вибрати</option>
+                                        <option value="{{ null }}"> Вибрати</option>
                                         @foreach(\App\Models\Result::all() as $result)
                                             <option
                                                 value="{{ $result->id }}" {{ $patient->result_id == $result->id ? 'checked' : '' }}>
@@ -226,7 +252,7 @@
                                     <label class="control-label" for="patient[previous_diagnosis]">Попередній
                                         діагноз</label>
                                     <select name="patient[previous_diagnosis]" class="select2">
-                                        <option> Вибрати</option>
+                                        <option value="{{ null }}"> Вибрати</option>
                                         @foreach(json_decode(\App\Models\CallSetting::where('slug', \App\Models\CallSetting::DIAGNOSES_SLUG)->first()->value) as $key => $name)
                                             <option
                                                 value="{{ $key }}" {{ $patient->previous_diagnosis == $key ? 'checked' : '' }}>

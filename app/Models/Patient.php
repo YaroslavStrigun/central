@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Models\Call;
 use App\Models\CallSetting;
 use App\Models\Result;
 use App\Models\SocialStatus;
@@ -25,6 +26,11 @@ class Patient extends Model
     public function trauma()
     {
         return $this->belongsTo(Trauma::class);
+    }
+
+    public function calls()
+    {
+        return $this->hasMany(Call::class);
     }
 
     public function getObjectiveDataAttribute($value)
