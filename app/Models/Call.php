@@ -24,4 +24,9 @@ class Call extends Model
     {
         return $this->belongsTo(UrgencyOffCall::class);
     }
+
+    public function brigade_call()
+    {
+        return $this->hasMany(BrigadeCall::class);
+    }
 }

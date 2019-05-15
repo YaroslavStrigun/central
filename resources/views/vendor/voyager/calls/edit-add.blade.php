@@ -64,35 +64,51 @@
                                     }
                                 @endphp
                                 @if (isset($row->details->legend) && isset($row->details->legend->text))
-                                    <legend class="text-{{ $row->details->legend->align ?? 'center' }}" style="background-color: {{ $row->details->legend->bgcolor ?? '#f0f0f0' }};padding: 5px;">{{ $row->details->legend->text }}</legend>
+                                    <legend class="text-{{ $row->details->legend->align ?? 'center' }}"
+                                            style="background-color: {{ $row->details->legend->bgcolor ?? '#f0f0f0' }};padding: 5px;">{{ $row->details->legend->text }}</legend>
                                 @endif
-                                <div class="form-group @if($row->type == 'hidden') hidden @endif col-md-{{ $row->field == "call_belongsto_urgency_off_call_relationship" ? 4 : ($display_options->width ?? 12) }} {{ $errors->has($row->field) ? 'has-error' : '' }}" @if(isset($display_options->id)){{ "id=$display_options->id" }}@endif>
+                                <div
+                                    class="form-group @if($row->type == 'hidden') hidden @endif col-md-{{ $row->field == "call_belongsto_urgency_off_call_relationship" ? 4 : ($display_options->width ?? 12) }} {{ $errors->has($row->field) ? 'has-error' : '' }}" @if(isset($display_options->id)){{ "id=$display_options->id" }}@endif>
                                     {{ $row->slugify }}
                                     <label class="control-label" for="name">{{ $row->display_name }}</label>
                                     @if($row->field == 'user_id')
-                                        <input type="number" value="{{ Auth::user()->id }}" disabled class="form-control">
+                                        <input type="number" value="{{ Auth::user()->id }}" disabled
+                                               class="form-control">
                                     @else
-                                    @include('voyager::multilingual.input-hidden-bread-edit-add')
-                                    @if (isset($row->details->view))
-                                        @include($row->details->view, ['row' => $row, 'dataType' => $dataType, 'dataTypeContent' => $dataTypeContent, 'content' => $dataTypeContent->{$row->field}, 'action' => ($edit ? 'edit' : 'add')])
-                                    @elseif ($row->type == 'relationship')
-                                        @include('voyager::formfields.relationship', ['options' => $row->details])
-                                    @else
-                                        {!! app('voyager')->formField($row, $dataType, $dataTypeContent) !!}
-                                    @endif
+                                        @include('voyager::multilingual.input-hidden-bread-edit-add')
+                                        @if (isset($row->details->view))
+                                            @include($row->details->view, ['row' => $row, 'dataType' => $dataType, 'dataTypeContent' => $dataTypeContent, 'content' => $dataTypeContent->{$row->field}, 'action' => ($edit ? 'edit' : 'add')])
+                                        @elseif ($row->type == 'relationship')
+                                            @include('voyager::formfields.relationship', ['options' => $row->details])
+                                        @else
+                                            {!! app('voyager')->formField($row, $dataType, $dataTypeContent) !!}
+                                        @endif
 
-                                    @foreach (app('voyager')->afterFormFields($row, $dataType, $dataTypeContent) as $after)
-                                        {!! $after->handle($row, $dataType, $dataTypeContent) !!}
-                                    @endforeach
-                                    @if ($errors->has($row->field))
-                                        @foreach ($errors->get($row->field) as $error)
-                                            <span class="help-block">{{ $error }}</span>
+                                        @foreach (app('voyager')->afterFormFields($row, $dataType, $dataTypeContent) as $after)
+                                            {!! $after->handle($row, $dataType, $dataTypeContent) !!}
                                         @endforeach
-                                    @endif
+                                        @if ($errors->has($row->field))
+                                            @foreach ($errors->get($row->field) as $error)
+                                                <span class="help-block">{{ $error }}</span>
+                                            @endforeach
+                                        @endif
                                     @endif
                                 </div>
                             @endforeach
-
+                            <div class="patient col-md-12">
+                                <h3>Бригада</h3>
+                                @if($dataTypeContent->brigade_call->first())
+                                @else
+                                    <div class="form-group col-md-2">
+                                        <select name="brigade_call[brigade_id]">
+                                            <option>Виберіть бригаду</option>
+                                        @foreach(Auth::user()->station->brigades as $brigade)
+                                            <option value="{{ $brigade->id }}">{{ $brigade->car->state_number ?? $brigade->id }}</option>
+                                        @endforeach
+                                        </select>
+                                    </div>
+                                @endif
+                            </div>
                             <div class="patient">
                                 <h3>Пацієнт</h3>
                                 @php
@@ -100,15 +116,18 @@
                                 @endphp
                                 <div class="form-group  col-md-4 ">
                                     <label class="control-label" for="patient[name]">ПІБ пацієнта</label>
-                                    <input type="text" value="{{ $patient->name }}" name="patient[name]" class="form-control">
+                                    <input type="text" value="{{ $patient->name }}" name="patient[name]"
+                                           class="form-control">
                                 </div>
                                 <div class="form-group  col-md-3 ">
                                     <label class="control-label" for="patient[phone]">Тел</label>
-                                    <input type="text" value="{{ $patient->phone }}" name="patient[phone]" class="form-control">
+                                    <input type="text" value="{{ $patient->phone }}" name="patient[phone]"
+                                           class="form-control">
                                 </div>
                                 <div class="form-group  col-md-1 ">
                                     <label class="control-label" for="patient[age]">Вік</label>
-                                    <input type="number" name="patient[age]" value="{{ $patient->age }}" min="0" max="130" class="form-control">
+                                    <input type="number" name="patient[age]" value="{{ $patient->age }}" min="0"
+                                           max="130" class="form-control">
                                 </div>
                                 <div class="form-group  col-md-2 ">
                                     <label class="control-label" for="patient[male]">Стать</label>
@@ -130,60 +149,72 @@
                                 </div>
                                 <div class="form-group  col-md-4 ">
                                     <label class="control-label" for="patient[address]">Адресса</label>
-                                    <input type="text" name="patient[address]" value="{{ $patient->address }}" class="form-control">
+                                    <input type="text" name="patient[address]" value="{{ $patient->address }}"
+                                           class="form-control">
                                 </div>
                                 <div class="form-group  col-md-2 ">
                                     <label class="control-label" for="patient[social_status_id]">Соц. статус</label>
                                     <select name="patient[social_status_id]" class="select2">
-                                        <option> Вибрати </option>
+                                        <option> Вибрати</option>
                                         @foreach(\App\Models\SocialStatus::all() as $status)
-                                            <option value="{{ $status->id }}" {{ $patient->social_status_id == $status->id ? 'checked' : '' }}>
+                                            <option
+                                                value="{{ $status->id }}" {{ $patient->social_status_id == $status->id ? 'checked' : '' }}>
                                                 {{ $status->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                                 <div class="form-group  col-md-2">
-                                    <label class="control-label" for="patient[further_stay]">Подальше перебування</label>
-                                    <input type="text" name="patient[further_stay]" value="{{ $patient->further_stay }}" class="form-control">
+                                    <label class="control-label" for="patient[further_stay]">Подальше
+                                        перебування</label>
+                                    <input type="text" name="patient[further_stay]" value="{{ $patient->further_stay }}"
+                                           class="form-control">
                                 </div>
                                 <div class="form-group  col-md-2">
                                     <label class="control-label" for="patient[departure_type]">Тип виїзду</label>
-                                    <input type="text" name="patient[departure_type]" value="{{ $patient->departure_type }}" class="form-control">
+                                    <input type="text" name="patient[departure_type]"
+                                           value="{{ $patient->departure_type }}" class="form-control">
                                 </div>
                                 <div class="form-group  col-md-2">
                                     <label class="control-label" for="patient[place_off_call]">Місце виклику</label>
-                                    <input type="text" name="patient[place_off_call]" value="{{ $patient->place_off_call }}" class="form-control">
+                                    <input type="text" name="patient[place_off_call]"
+                                           value="{{ $patient->place_off_call }}" class="form-control">
                                 </div>
                                 <div class="form-group  col-md-2">
                                     <label class="control-label" for="patient[call_type]">Виклик</label>
-                                    <input type="text" name="patient[call_type]" value="{{ $patient->call_type }}" class="form-control">
+                                    <input type="text" name="patient[call_type]" value="{{ $patient->call_type }}"
+                                           class="form-control">
                                 </div>
                                 <div class="form-group  col-md-2 ">
                                     <label class="control-label" for="patient[trauma_id]">Травма</label>
                                     <select name="patient[trauma_id]" class="select2">
-                                        <option> Вибрати </option>
+                                        <option> Вибрати</option>
                                         @foreach(\App\Models\Trauma::all() as $trauma)
-                                            <option value="{{ $trauma->id }}" {{ $patient->trauma_id == $trauma->id ? 'checked' : '' }}>
+                                            <option
+                                                value="{{ $trauma->id }}" {{ $patient->trauma_id == $trauma->id ? 'checked' : '' }}>
                                                 {{ $trauma->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                                 <div class="form-group  col-md-2">
-                                    <label class="control-label" for="patient[pathological_date]">Початок патолог. стану</label>
-                                    <input type="datetime-local" name="patient[pathological_date]" value="{{ $patient->pathological_date }}" class="form-control">
+                                    <label class="control-label" for="patient[pathological_date]">Початок патолог.
+                                        стану</label>
+                                    <input type="datetime-local" name="patient[pathological_date]"
+                                           value="{{ $patient->pathological_date }}" class="form-control">
                                 </div>
                                 <div class="form-group  col-md-2 ">
                                     <label class="control-label" for="patient[result_id]">Результат</label>
                                     <select name="patient[result_id]" class="select2">
-                                        <option> Вибрати </option>
+                                        <option> Вибрати</option>
                                         @foreach(\App\Models\Result::all() as $result)
-                                            <option value="{{ $result->id }}" {{ $patient->result_id == $result->id ? 'checked' : '' }}>
+                                            <option
+                                                value="{{ $result->id }}" {{ $patient->result_id == $result->id ? 'checked' : '' }}>
                                                 {{ $result->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                                 <div class="form-group  col-md-2 ">
-                                    <label class="control-label" for="patient[unsuccessful_departure]">Безрезультатний</label>
+                                    <label class="control-label"
+                                           for="patient[unsuccessful_departure]">Безрезультатний</label>
                                     <input type="checkbox"
                                            name="patient[unsuccessful_departure]"
                                            class="toggleswitch"
@@ -192,34 +223,59 @@
                                            data-off="Ні">
                                 </div>
                                 <div class="form-group  col-md-2 ">
-                                    <label class="control-label" for="patient[previous_diagnosis]">Попередній діагноз</label>
+                                    <label class="control-label" for="patient[previous_diagnosis]">Попередній
+                                        діагноз</label>
                                     <select name="patient[previous_diagnosis]" class="select2">
-                                        <option> Вибрати </option>
-                                        @foreach([] as $diagnosis)
-                                            <option value="{{ $diagnosis->id }}" {{ $patient->previous_diagnosis == $diagnosis->id ? 'checked' : '' }}>
-                                                {{ $diagnosis->name }}</option>
+                                        <option> Вибрати</option>
+                                        @foreach(json_decode(\App\Models\CallSetting::where('slug', \App\Models\CallSetting::DIAGNOSES_SLUG)->first()->value) as $key => $name)
+                                            <option
+                                                value="{{ $key }}" {{ $patient->previous_diagnosis == $key ? 'checked' : '' }}>
+                                                {{ $name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                                 <div class="form-group  col-md-2">
                                     <label class="control-label" for="patient[anamnesis]">Анамнез</label>
-                                    <input type="text" name="patient[anamnesis]" value="{{ $patient->anamnesis }}" class="form-control">
+                                    <input type="text" name="patient[anamnesis]" value="{{ $patient->anamnesis }}"
+                                           class="form-control">
                                 </div>
                                 <div class="form-group col-md-12">
                                     <h4>Об'єктивні дані</h4>
+                                    @foreach($patient->objective_data as $key => $value)
+                                        <div class="col-md-2">
+                                            <label>{{ $key }}</label>
+                                            <input type="text" name="patient[objective_data][{{ $key }}]"
+                                                   value="{{ $value }}" class="form-control">
+                                        </div>
+                                    @endforeach
                                 </div>
                                 <div class="form-group col-md-12">
                                     <h4>Надана медична допомога</h4>
+                                    @foreach($patient->medicaid as $key => $value)
+                                        <div class="col-md-2">
+                                            <label>{{ $key }}</label>
+                                            <input type="text" name="patient[medicaid][{{ $key }}]" value="{{ $value }}"
+                                                   class="form-control">
+                                        </div>
+                                    @endforeach
                                 </div>
                                 <div class="form-group col-md-12">
                                     <h4>Стан після надання допомоги</h4>
+                                    @foreach($patient->state_after_relief as $key => $value)
+                                        <div class="col-md-2">
+                                            <label>{{ $key }}</label>
+                                            <input type="text" name="patient[state_after_relief][{{ $key }}]"
+                                                   value="{{ $value }}" class="form-control">
+                                        </div>
+                                    @endforeach
                                 </div>
                             </div>
 
                         </div><!-- panel-body -->
 
                         <div class="panel-footer">
-                            <button type="submit" class="btn btn-primary save">{{ __('voyager::generic.save') }}</button>
+                            <button type="submit"
+                                    class="btn btn-primary save">{{ __('voyager::generic.save') }}</button>
                         </div>
                     </form>
 
@@ -243,17 +299,22 @@
 
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal"
-                            aria-hidden="true">&times;</button>
-                    <h4 class="modal-title"><i class="voyager-warning"></i> {{ __('voyager::generic.are_you_sure') }}</h4>
+                            aria-hidden="true">&times;
+                    </button>
+                    <h4 class="modal-title"><i class="voyager-warning"></i> {{ __('voyager::generic.are_you_sure') }}
+                    </h4>
                 </div>
 
                 <div class="modal-body">
-                    <h4>{{ __('voyager::generic.are_you_sure_delete') }} '<span class="confirm_delete_name"></span>'</h4>
+                    <h4>{{ __('voyager::generic.are_you_sure_delete') }} '<span class="confirm_delete_name"></span>'
+                    </h4>
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">{{ __('voyager::generic.cancel') }}</button>
-                    <button type="button" class="btn btn-danger" id="confirm_delete">{{ __('voyager::generic.delete_confirm') }}</button>
+                    <button type="button" class="btn btn-default"
+                            data-dismiss="modal">{{ __('voyager::generic.cancel') }}</button>
+                    <button type="button" class="btn btn-danger"
+                            id="confirm_delete">{{ __('voyager::generic.delete_confirm') }}</button>
                 </div>
             </div>
         </div>
@@ -267,14 +328,14 @@
         var $file;
 
         function deleteHandler(tag, isMulti) {
-            return function() {
+            return function () {
                 $file = $(this).siblings(tag);
 
                 params = {
-                    slug:   '{{ $dataType->slug }}',
-                    filename:  $file.data('file-name'),
-                    id:     $file.data('id'),
-                    field:  $file.parent().data('field-name'),
+                    slug: '{{ $dataType->slug }}',
+                    filename: $file.data('file-name'),
+                    id: $file.data('id'),
+                    field: $file.parent().data('field-name'),
                     multi: isMulti,
                     _token: '{{ csrf_token() }}'
                 }
@@ -300,7 +361,7 @@
             $('.side-body').multilingual({"editing": true});
             @endif
 
-            $('.side-body input[data-slug-origin]').each(function(i, el) {
+            $('.side-body input[data-slug-origin]').each(function (i, el) {
                 $(el).slugify();
             });
 
@@ -309,15 +370,17 @@
             $('.form-group').on('click', '.remove-multi-file', deleteHandler('a', true));
             $('.form-group').on('click', '.remove-single-file', deleteHandler('a', false));
 
-            $('#confirm_delete').on('click', function(){
+            $('#confirm_delete').on('click', function () {
                 $.post('{{ route('voyager.media.remove') }}', params, function (response) {
-                    if ( response
+                    if (response
                         && response.data
                         && response.data.status
-                        && response.data.status == 200 ) {
+                        && response.data.status == 200) {
 
                         toastr.success(response.data.message);
-                        $file.parent().fadeOut(300, function() { $(this).remove(); })
+                        $file.parent().fadeOut(300, function () {
+                            $(this).remove();
+                        })
                     } else {
                         toastr.error("Error removing file.");
                     }

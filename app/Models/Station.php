@@ -22,4 +22,9 @@ class Station extends Model
     {
         return $this->belongsTo(StationType::class);
     }
+
+    public function brigades()
+    {
+        return $this->hasMany(Brigade::class);
+    }
 }

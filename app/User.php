@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Models\Brigade;
+use App\Models\Station;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -16,18 +17,18 @@ class User extends \TCG\Voyager\Models\User
      *
      * @var array
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'brigade_id',
-        'document',
-        'qualification',
-        'education',
-        'experience',
-        'work_place',
-        'certificate'
-    ];
+//    protected $fillable = [
+//        'name',
+//        'email',
+//        'password',
+//        'brigade_id',
+//        'document',
+//        'qualification',
+//        'education',
+//        'experience',
+//        'work_place',
+//        'certificate'
+//    ];
 
     /**
      * The attributes that should be hidden for arrays.
@@ -50,6 +51,11 @@ class User extends \TCG\Voyager\Models\User
     public function brigade()
     {
         return $this->belongsTo(Brigade::class);
+    }
+
+    public function station()
+    {
+        return $this->belongsTo(Station::class);
     }
 
     public function getLocaleAttribute()
