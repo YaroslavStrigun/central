@@ -28,4 +28,19 @@ class Brigade extends Model
     {
         return $this->hasMany(BrigadeCall::class);
     }
+
+    public function scopeAvailable($query)
+    {
+        return $query;
+    }
+
+    public function station()
+    {
+        return $this->belongsTo(Station::class);
+    }
+
+    public function getAddressAttribute()
+    {
+        return $this->address ?? $this->station->address;
+    }
 }

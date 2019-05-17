@@ -7,6 +7,22 @@
 
 @section('css')
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <style>
+        /* Always set the map height explicitly to define the size of the div
+         * element that contains the map. */
+        #map {
+            height: 300px;
+        }
+
+        /* Optional: Makes the sample page fill the window. */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
 @stop
 
 @section('page_title', __('voyager::generic.'.($edit ? 'edit' : 'add')).' '.$dataType->display_name_singular)
@@ -74,6 +90,11 @@
                                     @if($row->field == 'user_id')
                                         <input type="number" value="{{ Auth::user()->id }}" disabled
                                                class="form-control">
+                                    @elseif($row->field == 'call_address')
+                                        <input type="text" class="form-control" name="call_address"
+                                               placeholder="Адреса виклику"
+                                               value="{{ $dataTypeContent->call_address }}">
+                                        <div id="map"></div>
                                     @else
                                         @include('voyager::multilingual.input-hidden-bread-edit-add')
                                         @if (isset($row->details->view))
@@ -103,34 +124,40 @@
                                     @endphp
                                     <div class="form-group col-md-2">
                                         <label>Номер бригади</label>
-                                        <input type="number" name="brigade_id" value="{{ $brigade_call->brigade_id }}" disabled class="form-control">
-                                        <input type="hidden" name="brigade_id" value="{{ $brigade_call->brigade_id }}" class="form-control">
+                                        <input type="number" name="brigade_id" value="{{ $brigade_call->brigade_id }}"
+                                               disabled class="form-control">
+                                        <input type="hidden" name="brigade_id" value="{{ $brigade_call->brigade_id }}"
+                                               class="form-control">
                                     </div>
                                     <div class="form-group col-md-2">
                                         <label>Статус бригади</label>
                                         <select name="brigade_call[brigade_status_id]" class="select2 form-control">
                                             <option value="{{ null }}">Виберіть статус</option>
                                             @foreach(\App\Models\BrigadeStatus::all() as $status)
-                                                <option value="{{ $status->id }}" {{ $status->id == $brigade_call->brigade_status_id ? 'selected' : '' }}>
+                                                <option
+                                                    value="{{ $status->id }}" {{ $status->id == $brigade_call->brigade_status_id ? 'selected' : '' }}>
                                                     {{ $status->name }}</option>
                                             @endforeach
                                         </select>
                                     </div>
                                     <div class="form-group col-md-2">
                                         <label>Час прибуття до пацієнта</label>
-                                       <input type="datetime-local" name="brigade_call[arrival_time]" value="{{ $brigade_call->arrival_time }}" class="form-control">
+                                        <input type="datetime-local" name="brigade_call[arrival_time]"
+                                               value="{{ $brigade_call->arrival_time }}" class="form-control">
                                     </div>
                                     <div class="form-group col-md-2">
                                         <label>Час виїзду до пацієнта</label>
-                                        <input type="datetime-local" name="brigade_call[departure_time]" value="{{ $brigade_call->departure_time }}" class="form-control">
+                                        <input type="datetime-local" name="brigade_call[departure_time]"
+                                               value="{{ $brigade_call->departure_time }}" class="form-control">
                                     </div>
-                                    @else
+                                @else
                                     <div class="form-group col-md-2">
                                         <select name="brigade_id" class="select2 form-control">
                                             <option value="{{ null }}">Виберіть бригаду</option>
-                                        @foreach(Auth::user()->station->brigades as $brigade)
-                                            <option value="{{ $brigade->id }}">{{ $brigade->car->state_number ?? $brigade->id }}</option>
-                                        @endforeach
+                                            @foreach($available_brigades as $brigade)
+                                                <option
+                                                    value="{{ $brigade->id }}">{{ $brigade->car->state_number ?? $brigade->id }}</option>
+                                            @endforeach
                                         </select>
                                     </div>
                                 @endif
@@ -350,6 +377,139 @@
 
 @section('javascript')
     <script>
+        var geocoder;
+        var map;
+        var markersArray = [];
+            @if($dataTypeContent->call_address)
+        var call_address = '{{ $dataTypeContent->call_address}}';
+            @endif
+            @if($available_brigades)
+        var brigades = {};
+        @foreach($available_brigades as $brigade)
+            brigades['{{ $brigade->car->state_number }}'] = '{{ $brigade->address }}';
+
+        @endforeach
+        @endif
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition);
+            } else {
+                x.innerHTML = "Geolocation is not supported by this browser.";
+            }
+        }
+
+        function showPosition(position) {
+            alert("Latitude: " + position.coords.latitude +
+                "<br>Longitude: " + position.coords.longitude);
+        }
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 10,
+                center: {lat: -34.397, lng: 150.644}
+            });
+            geocoder = new google.maps.Geocoder();
+            // var directionsDisplay = new google.maps.DirectionsRenderer();
+            // var directionsService = new google.maps.DirectionsService;
+            //
+            // var request = {
+            //     origin: new google.maps.LatLng(60.023539414725356,30.283663272857666), //точка старта
+            //     destination: new google.maps.LatLng(59.79530896374892,30.410317182540894), //точка финиша
+            //     travelMode: google.maps.DirectionsTravelMode.DRIVING //режим прокладки маршрута
+            // };
+            //
+            // directionsService.route(request, function(response, status) {
+            //     if (status == google.maps.DirectionsStatus.OK) {
+            //         directionsDisplay.setDirections(response);
+            //     }
+            // });
+            //
+            // directionsDisplay.setMap(map);
+
+            if (typeof call_address != "undefined") {
+                codeAddress(call_address, 'Постраждалий');
+            }
+
+            if (typeof brigades != "undefined") {
+                $.each(brigades, function (car_number, brigade_address) {
+                    codeAddress(brigade_address, car_number, 'http://maps.google.com/mapfiles/kml/pal3/icon46.png', false);
+                })
+            }
+            console.log(google.maps.Animation);
+        }
+
+        function codeAddress(address, title, image = 'http://maps.google.com/mapfiles/kml/shapes/man.png', push_marker = true) {
+            geocoder.geocode({'address': address}, function (results, status) {
+                if (status === 'OK') {
+                    map.setCenter(results[0].geometry.location);
+                    var marker = new google.maps.Marker({
+                        map: map,
+                        position: results[0].geometry.location,
+                        title: title,
+                        icon: image,
+                        animation: google.maps.Animation.DROP
+                    });
+                    if (push_marker) {
+                        markersArray.push(marker);
+                    }
+                } else {
+                    alert('Google не може знайти адресу');
+                }
+            });
+        }
+
+        function clearOverlays() {
+            for (var i = 0; i < markersArray.length; i++) {
+                markersArray[i].setMap(null);
+            }
+            markersArray.length = 0;
+        }
+
+        $('input[name=call_address]').on('focusout', function () {
+            clearOverlays();
+            var call_address = $(this).val();
+            codeAddress(call_address, 'Постраждалий');
+            showNearbyHospitals(call_address);
+        });
+
+        function showNearbyHospitals(address) {
+            geocoder.geocode({'address': address}, function (results, status) {
+                if (status === 'OK') {
+                    var location = results[0].geometry.location;
+                    var request = {
+                        location: location,
+                        radius: '500',
+                        type: ['hospital']
+                    };
+
+                    var service = new google.maps.places.PlacesService(map);
+                    service.nearbySearch(request, function (results, status) {
+                        if (status == google.maps.places.PlacesServiceStatus.OK) {
+                            for (var i = 0; i < results.length; i++) {
+                                var place = results[i];
+                                // createMarker(place);
+                                console.log(place);
+                            }
+                        }
+                    })
+
+                }
+                ;
+            })
+
+            // var location = new google.maps.LatLng(-33.8665433,151.1956316);
+            //
+            // var request = {
+            //     location: pyrmont,
+            //     radius: '500',
+            //     type: ['hospital']
+            // };
+            //
+            // var service = new google.maps.places.PlacesService(map);
+            // service.nearbySearch(request, callback);
+        }
+
+
         var params = {};
         var $file;
 
@@ -372,6 +532,7 @@
         }
 
         $('document').ready(function () {
+            // getLocation();
             $('.toggleswitch').bootstrapToggle();
 
             //Init datepicker for date fields if data-datepicker attribute defined
@@ -417,4 +578,7 @@
             $('[data-toggle="tooltip"]').tooltip();
         });
     </script>
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_API_KEY', 'AIzaSyD7WhpaC4avnAxj8hBFaMOasjhtV7BU8MQ') }}&callback=initMap&libraries=places"
+        async defer></script>
 @stop
