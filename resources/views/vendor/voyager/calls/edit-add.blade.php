@@ -13,7 +13,8 @@
         /* Always set the map height explicitly to define the size of the div
          * element that contains the map. */
         #map {
-            height: 300px;
+            height: 400px;
+            margin-top: 15px;
         }
 
         /* Optional: Makes the sample page fill the window. */
@@ -95,6 +96,9 @@
                                                placeholder="Адреса виклику"
                                                value="{{ $dataTypeContent->call_address }}">
                                         <div id="map"></div>
+                                        @if(!$dataTypeContent->call_address)
+                                            <button type="button" style="display: none;" class="btn btn-primary show-hospitals">Показати лікарні поруч з пацієнтом</button>
+                                        @endif
                                     @else
                                         @include('voyager::multilingual.input-hidden-bread-edit-add')
                                         @if (isset($row->details->view))
@@ -383,7 +387,7 @@
             @if($dataTypeContent->call_address)
         var call_address = '{{ $dataTypeContent->call_address}}';
             @endif
-            @if($available_brigades)
+            @if(isset($available_brigades))
         var brigades = {};
         @foreach($available_brigades as $brigade)
             brigades['{{ $brigade->car->state_number }}'] = '{{ $brigade->address }}';
@@ -406,9 +410,12 @@
         function initMap() {
             map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 10,
-                center: {lat: -34.397, lng: 150.644}
+                center: {lat: 50.45466, lng: 30.5238}
             });
             geocoder = new google.maps.Geocoder();
+
+            console.log(new google.maps.LatLng(60.023539414725356,30.283663272857666));
+
             // var directionsDisplay = new google.maps.DirectionsRenderer();
             // var directionsService = new google.maps.DirectionsService;
             //
@@ -435,27 +442,29 @@
                     codeAddress(brigade_address, car_number, 'http://maps.google.com/mapfiles/kml/pal3/icon46.png', false);
                 })
             }
-            console.log(google.maps.Animation);
         }
 
         function codeAddress(address, title, image = 'http://maps.google.com/mapfiles/kml/shapes/man.png', push_marker = true) {
             geocoder.geocode({'address': address}, function (results, status) {
                 if (status === 'OK') {
-                    map.setCenter(results[0].geometry.location);
-                    var marker = new google.maps.Marker({
-                        map: map,
-                        position: results[0].geometry.location,
-                        title: title,
-                        icon: image,
-                        animation: google.maps.Animation.DROP
-                    });
-                    if (push_marker) {
-                        markersArray.push(marker);
-                    }
+                    createMarker(results[0].geometry.location, title, image, push_marker)
                 } else {
                     alert('Google не може знайти адресу');
                 }
             });
+        }
+
+        function createMarker(position, title, image, push_marker) {
+            var marker = new google.maps.Marker({
+                map: map,
+                position: position,
+                title: title,
+                icon: image,
+                animation: google.maps.Animation.DROP
+            });
+            if (push_marker) {
+                markersArray.push(marker);
+            }
         }
 
         function clearOverlays() {
@@ -469,6 +478,11 @@
             clearOverlays();
             var call_address = $(this).val();
             codeAddress(call_address, 'Постраждалий');
+            $('.show-hospitals').show();
+        });
+
+        $('.show-hospitals').on('click', function () {
+            call_address = $('input[name=call_address]').val();
             showNearbyHospitals(call_address);
         });
 
@@ -478,7 +492,7 @@
                     var location = results[0].geometry.location;
                     var request = {
                         location: location,
-                        radius: '500',
+                        radius: '1000',
                         type: ['hospital']
                     };
 
@@ -487,26 +501,13 @@
                         if (status == google.maps.places.PlacesServiceStatus.OK) {
                             for (var i = 0; i < results.length; i++) {
                                 var place = results[i];
-                                // createMarker(place);
-                                console.log(place);
+                                console.log(place, place.html_attributions);
+                                createMarker(place.geometry.location, place.name, '', true);
                             }
                         }
                     })
-
-                }
-                ;
+                };
             })
-
-            // var location = new google.maps.LatLng(-33.8665433,151.1956316);
-            //
-            // var request = {
-            //     location: pyrmont,
-            //     radius: '500',
-            //     type: ['hospital']
-            // };
-            //
-            // var service = new google.maps.places.PlacesService(map);
-            // service.nearbySearch(request, callback);
         }
 
 
